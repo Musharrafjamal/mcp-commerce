@@ -228,14 +228,22 @@ human gate real rather than theatrical), and any `dry_run: boolean` flag.
 
 *Ships ugly. Unmodified shadcn defaults, server actions only, zero client state.*
 
-- [ ] 7.1 `/approvals` — pending queue, one table 🔒
-- [ ] 7.2 `/approvals/[actionId]` — evidence bundle, computed effect, full policy rule list,
+- [x] 7.1 `/approvals` — pending queue, one table 🔒
+- [x] 7.2 `/approvals/[actionId]` — evidence bundle, computed effect, all 9 rule verdicts,
       Approve/Reject with a **required note** 🔒
-- [ ] 7.3 `/audit` — append-only feed, newest first
-- [ ] 7.4 `/` start-here — MCP URL + bearer token, 3 client config blocks, 3 copy-paste demo prompts,
-      reset button
-- [ ] 7.5 `POST /api/demo/reset` — token-guarded. Without it, reviewer #2 opens a case reviewer #1 resolved
-- [ ] 7.6 Tests I4, E2
+- [x] 7.3 `/audit` — append-only feed, newest first, denials included
+- [x] 7.4 `/` start-here — MCP URL + bearer token, 3 client config blocks, 3 demo prompts, reset button
+- [x] 7.5 Reset as a **server action**, not `POST /api/demo/reset` — the button is the only caller and a
+      server action needs no token round-trip. `src/services/reseed.ts` is shared with `bun run seed`
+      so the two cannot drift. *(deviation from the plan, deliberate)*
+- [x] 7.6 `app/error.tsx` — a legible failure page. Failing fast on a paused free-tier cluster is right,
+      but a blank 500 reads as "this project is broken"
+- [x] 7.7 **Approve flow exercised for real in a browser against production**, not just unit-tested:
+      note typed, Approve clicked → `executed`, decision attributed to `demo-manager` with the note, the
+      form replaced by "Decisions are single-use", and the refund visible in `/audit`
+
+      Caught during that check: `/audit` returned a bare 500 on a cold start — **R4 firing exactly as
+      predicted**. It recovered on reload. `app/error.tsx` now explains it rather than showing a blank page.
 
 ---
 

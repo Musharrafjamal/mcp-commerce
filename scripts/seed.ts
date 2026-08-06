@@ -3,36 +3,26 @@
  *
  *   bun run seed
  *
- * The scenarios themselves live in src/fixtures/scenarios.ts so the unit tests assert
- * against exactly the data the demo runs on.
+ * The scenarios live in src/fixtures/scenarios.ts so the unit tests assert against
+ * exactly the data the demo runs on; the write itself lives in src/services/reseed.ts
+ * so the in-app reset button cannot drift from this script.
  */
 
-import { ensureIndexes } from '@/src/db/indexes'
-import { getDb, dbName } from '@/src/db/client'
+import { dbName } from '@/src/db/client'
 import { COLLECTIONS } from '@/src/db/collections'
+import { getDb } from '@/src/db/client'
+import { reseedDemoData } from '@/src/services/reseed'
 import { ALL_SCENARIOS, HEALTHY_COUNT, SCENARIOS, buildScenario, seedNow } from '@/src/fixtures/scenarios'
 import { formatMoney } from '@/src/domain/types'
 
 const now = seedNow()
-const all = ALL_SCENARIOS()
-
-const db = await getDb()
 console.log(`\nseeding "${dbName()}"  (SEED_NOW = ${now.toISOString()})\n`)
 
-for (const name of Object.values(COLLECTIONS)) {
-  await db.collection(name).deleteMany({})
-}
-await ensureIndexes()
-
-const built = all.map((s, i) => buildScenario(s, i, now))
-
-await db.collection(COLLECTIONS.orders).insertMany(built.map(b => b.order) as never[])
-await db.collection(COLLECTIONS.shipments).insertMany(built.map(b => b.shipment) as never[])
-await db.collection(COLLECTIONS.payments).insertMany(built.map(b => b.payment) as never[])
-await db.collection(COLLECTIONS.orderEvents).insertMany(built.flatMap(b => b.events) as never[])
+const { orders, events } = await reseedDemoData(now)
 
 // --- manifest: doubles as the demo script AND the test expectation table -----
 
+const built = ALL_SCENARIOS().map((s, i) => buildScenario(s, i, now))
 const pad = (s: string, n: number) => s.padEnd(n)
 
 console.log('MANIFEST - planted scenarios\n')
@@ -46,8 +36,9 @@ for (let i = 0; i < SCENARIOS.length; i++) {
   )
 }
 console.log(`\n  + ${HEALTHY_COUNT} healthy filler orders (must not be detected)`)
-console.log(`  = ${all.length} orders, ${built.flatMap(b => b.events).length} events\n`)
+console.log(`  = ${orders} orders, ${events} events\n`)
 
+const db = await getDb()
 const counts = await Promise.all(
   Object.values(COLLECTIONS).map(async n => `${n}=${await db.collection(n).countDocuments()}`),
 )
