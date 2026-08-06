@@ -1,6 +1,11 @@
 import { MongoClient, type Db } from 'mongodb'
 
-export const DB_NAME = process.env.MONGODB_DB?.trim() || 'opscopilot'
+/**
+ * Resolved per call, not captured at import. The integration tests point at a separate
+ * database, and a module-level constant would freeze whichever value happened to be
+ * set when the first import ran.
+ */
+export const dbName = (): string => process.env.MONGODB_DB?.trim() || 'opscopilot'
 
 // Cached on globalThis in BOTH dev and production. Not just a dev-reload guard:
 // Next can instantiate a module more than once across bundles, and every extra
@@ -31,5 +36,5 @@ function connect(): Promise<MongoClient> {
 export const clientPromise: Promise<MongoClient> = (globalThis.__opsCopilotMongo ??= connect())
 
 export async function getDb(): Promise<Db> {
-  return (await clientPromise).db(DB_NAME)
+  return (await clientPromise).db(dbName())
 }

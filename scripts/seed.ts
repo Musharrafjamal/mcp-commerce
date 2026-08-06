@@ -8,7 +8,7 @@
  */
 
 import { ensureIndexes } from '@/src/db/indexes'
-import { getDb, DB_NAME } from '@/src/db/client'
+import { getDb, dbName } from '@/src/db/client'
 import { COLLECTIONS } from '@/src/db/collections'
 import { ALL_SCENARIOS, HEALTHY_COUNT, SCENARIOS, buildScenario, seedNow } from '@/src/fixtures/scenarios'
 import { formatMoney } from '@/src/domain/types'
@@ -17,7 +17,7 @@ const now = seedNow()
 const all = ALL_SCENARIOS()
 
 const db = await getDb()
-console.log(`\nseeding "${DB_NAME}"  (SEED_NOW = ${now.toISOString()})\n`)
+console.log(`\nseeding "${dbName()}"  (SEED_NOW = ${now.toISOString()})\n`)
 
 for (const name of Object.values(COLLECTIONS)) {
   await db.collection(name).deleteMany({})

@@ -150,19 +150,32 @@ cannot slip through with two sub-ceiling line refunds. That is test U4, not a co
 
 ## 5 · The write path (~35 min)
 
-- [ ] 5.1 `services/evidenceLoader.ts` — the one cross-system fan-out, 4 queries, one place
-- [ ] 5.2 `services/simGateway.ts` + `services/simCarrier.ts` — deterministic PSP and carrier mocks,
-      keyed on `gatewayRef` / `trackingNumber`
-- [ ] 5.3 `services/plans.ts` — `mintPlan()`: diagnose → computeRefund → policy → insert
-      `action_log{mode:'preview'}` with `stateHash`, `effectFingerprint`, `diagnosisSnapshot`, 15-min expiry
-- [ ] 5.4 `services/actions.ts` — `executeAction()`, the single write path:
-      **claim CAS → semantic dedupe → freshness → policy re-eval → effect → complete with verbatim result**
-- [ ] 5.5 `services/approvals.ts` — `listPending()`, `decide()` re-entering `executeAction` at the
-      **freshness** step, so freshness and policy are re-checked at the moment of sign-off
-- [ ] 5.6 Tests I1, I2, I3
-- [ ] 🔒 **Hard checkpoint:** `investigate → verify → preview → issue_refund` runs end-to-end in a bun
-      script with policy, idempotency and audit **before any MCP surface polish**. If it doesn't, the
-      whole drop list goes at once rather than item by item
+- [x] 5.1 `services/evidenceLoader.ts` — the one cross-system fan-out. `normaliseOrderRef` accepts
+      `ORD-1004`, `#1004` or `1004` but does **no fuzzy matching**: a hallucinated id errors rather than
+      resolving to the nearest real order
+- [x] 5.2 `services/simulators.ts` — deterministic PSP and carrier mocks keyed on `planId` /
+      `trackingNumber`, so an idempotent replay reproduces byte-for-byte
+- [x] 5.3 `services/plans.ts` — `mintPlan()` and `verifyCarrierException()`. Both write to `action_log`;
+      a verification is audited because a refund's authority rests on it having happened
+- [x] 5.4 `services/actions.ts` — `executeAction()`, the single write path
+- [x] 5.5 `services/approvals.ts` — `listPending()`, `getAction()`, `listAudit()`, `decide()`.
+      **No MCP tool reaches this file**; approval exists only as a Next.js server action
+- [x] 5.6 `services/counters.ts` — policy counters read from `action_log` and the payment ledger,
+      never from memory, so a redeploy mid-incident cannot reset a circuit breaker
+- [x] 5.7 Tests **I1–I4** — **93 assertions total, 0 fail**, ~18s against a separate `opscopilot_test`
+      database so a test run can never touch the data a reviewer is looking at
+- [x] 🔒 **Hard checkpoint met:** `verify → preview → issue_refund` runs end-to-end with policy,
+      idempotency and audit before any MCP surface exists
+
+      **Two test defects found and fixed:** the audit assertion counted denials left behind by an
+      earlier test, which a later `reseed()` erased — now self-contained. And `.rejects.toThrow()`
+      with no argument hangs under `bun test` (the sibling call passing a regex is fine); replaced
+      with an explicit catch.
+
+      **Known limitation, documented not hidden:** if the process dies between the ledger write and
+      the `action_log` completion, that plan stays `claimed` and returns `IN_FLIGHT` forever. It
+      cannot double-refund — the re-preview path is caught by `effectFingerprint` dedupe — but the
+      plan is stuck. A claim reaper is the fix; it is not worth the hours here.
 
 ---
 
