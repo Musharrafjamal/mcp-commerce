@@ -113,15 +113,21 @@ Graded as heavily as the code. Do not batch these to the end.
 
 ## 4 · Policy + refund math (~35 min)
 
-- [ ] 4.1 `src/config/policy.ts` — the `POLICY` constant (flat $150 ceiling, 24h verification freshness,
-      gateway-code sets, circuit-breaker limits). Also renders `ops://policy/current`, so the published
-      policy cannot drift from the engine
-- [ ] 4.2 `domain/refund.ts` — `computeRefund()`. **The only place in the codebase an amount is derived**
-- [ ] 4.3 `domain/policy.ts` — the 9 rules, pure: `(bundle, effect, actor, counters) => Verdict + RuleResult[]`
-- [ ] 4.4 `domain/escalation.ts` — the manager-approval record: evidence, computed effect, the rule that
-      fired, recommended action
-- [ ] 4.5 `domain/fingerprint.ts` — `stateHash(bundle)`, `effectFingerprint(effect)`
-- [ ] 4.6 Tests U4–U9, U11
+- [x] 4.1 `src/config/policy.ts` — the `POLICY` constant (flat $150 ceiling, 24h verification freshness,
+      gateway-code sets, circuit-breaker limits)
+- [x] 4.2 `domain/refund.ts` — `computeRefund()`. **The only place an amount is derived**, from the
+      payment ledger rather than `order.totals`. Line refunds are capped at the remaining balance
+- [x] 4.3 `domain/policy.ts` — the 9 rules, pure. Counters (rolling window, circuit breaker) are passed
+      in from `action_log` by the service layer, never held in memory
+- [x] 4.4 `domain/escalation.ts` — the manager-approval record: triggering rules, computed effect,
+      competing hypotheses with contradicting evidence, risk signals, fenced third-party text
+- [x] 4.5 `domain/fingerprint.ts` — `stateHash(bundle)`, `effectFingerprint(action, orderId, effect)`
+- [x] 4.6 Tests **U4–U9, U11b** + escalation coverage — **78 assertions, 0 fail, ~93ms**
+
+      All six seeded scenarios reach the verdict the manifest promises, asserted as a table.
+      `stateHash` deliberately spans the payment ledger, shipment and verification, not just
+      `order.updatedAt` — a failed refund flipping to settled changes no array length and no order
+      field, and a test pins exactly that case.
 
 ### The 9 rules — any `deny` wins, else any `require_approval` wins, else `allow`
 
