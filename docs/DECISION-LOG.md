@@ -102,7 +102,7 @@ If there were another day, the first addition would be a headless console that s
 
 **Options considered:**
 - **A. Brief-faithful ~4–5h** — one workflow, real guardrails, focused tests, then spend the remaining
-  time on README, DECISIONS, worklog and video, which are also graded.
+  time on README, DECISIONS and the worklog, which are also graded.
 - **B. Stretch ~8–10h** — richer dataset, second workflow, more polished console.
 - **C. Build broad, submit narrow.**
 

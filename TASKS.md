@@ -15,7 +15,7 @@ Graded as heavily as the code. Do not batch these to the end.
 - [ ] 0.2 Reply email — `docs/client/email-02-scope-confirmed.md` 🔒
 - [ ] 0.3 Progress update after the hosting spike — live MCP URL + tool list
 - [ ] 0.4 Mid-build update sharing one real in-flight tradeoff
-- [ ] 0.5 Submission email — URL, repo, video, docs, honest "what I didn't finish"
+- [ ] 0.5 Submission email — URL, repo, docs, honest "what I didn't finish"
 
 ---
 
@@ -73,7 +73,7 @@ Graded as heavily as the code. Do not batch these to the end.
 - [x] 2.3 `src/db/collections.ts` typed accessors + `src/db/indexes.ts` (idempotent, no TTL on `action_log`)
 - [x] 2.4 `scripts/seed.ts` — `mulberry32(0xC0FFEE)`, env-overridable `SEED_NOW`, 10 **literal** fixtures
       + 18 filler orders = 28 orders / 203 events
-- [x] 2.5 Seed prints the **manifest** — doubles as the demo script and the test expectation table
+- [x] 2.5 Seed prints the **manifest** — doubles as the walkthrough in §10 and the test expectation table
 - [x] ✅ `bun run seed` clean twice in a row; `tsc --noEmit` exit 0
 
       Note: the URI you supplied has no database in its path, so the DB name is set in code
@@ -275,23 +275,118 @@ human gate real rather than theatrical), and any `dry_run: boolean` flag.
 
 ---
 
-## 10 · Demo video ⏱ target 4:30, ~45 min for script + 2 takes 🔒
+## 10 · How to test it, step by step
 
-Real deployed URL visible in the address bar throughout. Never localhost.
+Connect once, then run the five walkthroughs in order. Each is a distinct behaviour, not a repeat.
 
-- [ ] 10.1 `0:00–0:25` Cold open on a concrete incident, not a category. Persona, workflow, scope
-- [ ] 10.2 `0:25–0:50` One architecture still. State the thesis
-- [ ] 10.3 `0:50–1:15` **Show `tools/list`; read one description and schema on screen.** Say why it is
-      task-shaped and not `query_orders`. *Most candidates skip this; the rubric names it explicitly*
-- [ ] 10.4 `1:15–2:45` Workflow live on ORD-1001. Load-bearing line: *"this root cause, this evidence
-      and this confidence come from deterministic server-side rules — the model is reading a verdict,
-      not authoring one."* Then ORD-1006: carrier says `IN_TRANSIT`, refund **denied as premature**
-- [ ] 10.5 `2:45–3:50` **Safety block:** ORD-1007 auto-refunds → replay the identical call, show it is
-      a no-op → ORD-1002 over ceiling → escalation with evidence → approve in `/approvals` → audit
-      entry → ORD-1003 low confidence, competing hypotheses, refuses to recommend
-- [ ] 10.6 `3:50–4:15` Run the tests on screen; name *why* those behaviors matter
-- [ ] 10.7 `4:15–4:30` Biggest tradeoff, out of scope, next steps. URL + repo on the final frame
-- [ ] 10.8 Timestamped chapters in the README
+**Reset first if anyone has used the demo before you** — the console's *Reset demo data* button, or
+`bun run seed` locally. Scenarios are consumed once resolved.
+
+### Connect
+
+```bash
+claude mcp add --transport http ops-copilot \
+  https://ops-copilot-musharraf008s-projects.vercel.app/api/mcp \
+  --header "Authorization: Bearer ops-demo-12dc8b077e028dcc71526cb8"
+```
+
+Or MCP Inspector (`npx @modelcontextprotocol/inspector`, transport *Streamable HTTP*), or any client
+that reads the repo's `.mcp.json`.
+
+- [ ] 10.0 Confirm the connection: run `/mcp` in Claude Code. Expect **5 tools, 3 resources, 1 prompt**
+
+---
+
+### 1 · The queue, and the engine acting on its own authority
+
+> **"What delivery exceptions are open right now?"**
+
+- [ ] 10.1 Expect **7 of 28** orders — the detectors filter. Ranked worst-first, each with a one-line why
+
+> **"Work ORD-1001 through to a resolution."**
+
+- [ ] 10.2 Watch it run `investigate → verify → preview → issue`, then re-investigate to confirm
+- [ ] 10.3 Expect an **auto-executed refund of $87.08**. Verified lost, under the $150 ceiling, no human asked
+
+*What to look for:* the root cause, the evidence and the confidence all come from server-side rules.
+The model is reading a verdict, not authoring one. Ask it to show you the raw `structuredContent` if
+you want to see that the reasoning is not in the transcript.
+
+---
+
+### 2 · Verification is a mechanism, not a label
+
+> **"ORD-1006 is late too. Should we refund that one as well?"**
+
+- [ ] 10.4 Expect **deny — premature**, with a revised ETA
+
+*What to look for:* ORD-1006 is **indistinguishable from ORD-1001 in our own data** — same scan gap,
+same breached promise date, same diagnosis at the same confidence. Only the carrier call separates
+them. This is the client's "verified carrier exception" doing actual work.
+
+> **"Try again, it's been long enough."**
+
+- [ ] 10.5 Expect it to **refuse to retry** rather than reshape the request. A denial is not an error
+
+---
+
+### 3 · The human gate
+
+> **"ORD-1002 is lost as well. Refund it."**
+
+- [ ] 10.6 Expect **requires_approval** — $219.92 is over the ceiling — with an approval URL, and
+      **zero money moved**
+- [ ] 10.7 Open `/approvals`, click through to the detail page. Confirm you can see the computed amount,
+      **all nine rule verdicts**, the competing hypotheses, and the fenced third-party text
+- [ ] 10.8 Approve it with a note. Expect `executed`, your name and note recorded, and the form replaced
+      by *"Decisions are single-use"*
+- [ ] 10.9 Ask the agent to check the order again — it now reports the refund as settled
+
+*What to look for:* **no MCP tool can approve anything.** The agent raised the request and can read its
+status, but the decision exists only as a server action. That omission is the whole gate.
+
+---
+
+### 4 · It declines to conclude
+
+> **"The customer on ORD-1003 says their parcel never arrived. Refund them."**
+
+- [ ] 10.10 Expect **low confidence**, ≥2 competing hypotheses each carrying *contradicting* evidence,
+      **no recommended action**, and an escalation
+- [ ] 10.11 Confirm the prior-claim signal is surfaced (same customer, ORD-0977, 71 days earlier) as a
+      note for the human — **not** folded into the ranking
+
+*What to look for:* the carrier's GPS puts the delivery 28 m from the door, and the customer says it
+never came. Both stories have support and both have something against them. The correct output is a
+refusal to pick.
+
+---
+
+### 5 · The safety properties, directly
+
+> **"Refund ORD-1004."**
+
+- [ ] 10.12 Expect **deny** — the ledger shows it is already fully refunded, even though the order
+      status still reads `open`. *Trust the ledger, not the order record*
+
+> **"Refund $5,000 on ORD-1005."**
+
+- [ ] 10.13 Expect the amount to be **ignored entirely** — there is no field to put it in. The server
+      computes $121.64, then escalates because the original card is closed
+
+> Re-issue a `plan_id` you already executed
+
+- [ ] 10.14 Expect `replayed: true` and **one** refund transaction, not two
+
+- [ ] 10.15 Open `/audit`. Every attempt is there **including the refused ones**, with the actor, the
+      rules that fired and the amount
+
+---
+
+### Run the checks yourself
+
+- [ ] 10.16 `bun run verify:deployed` — 68 assertions over raw JSON-RPC against production
+- [ ] 10.17 `bun run test` — 93 assertions (needs `MONGODB_URI` in `.env.local`)
 
 ---
 
@@ -303,7 +398,7 @@ Real deployed URL visible in the address bar throughout. Never localhost.
 | ORD-1001 $88 | Same pattern, larger amount, still under ceiling | **allow** → the engine acts on its own authority |
 | ORD-1002 $218 | Same pattern, **over the $150 ceiling** | **require_approval** → manager approves → executes. The human loop closes |
 | ORD-1006 $95 | Past promise date, but carrier → `IN_TRANSIT, revised ETA +2d` | **deny — premature.** ⭐ Proves "verified carrier exception" is load-bearing, not a label |
-| ORD-1003 $340 | `delivered` scan D-3, geocode within 30m of shipTo; customer contact D-1 "not received"; same customer had an identical claim + refund 71 days ago | **low confidence + require_approval at any amount.** ≥2 competing hypotheses each with contradicting evidence, prior-claim signal surfaced, **no recommended action.** ⭐ Video centerpiece — the others prove it can act; this proves it knows when it cannot |
+| ORD-1003 $340 | `delivered` scan D-3, geocode within 30m of shipTo; customer contact D-1 "not received"; same customer had an identical claim + refund 71 days ago | **low confidence + require_approval at any amount.** ≥2 competing hypotheses each with contradicting evidence, prior-claim signal surfaced, **no recommended action.** ⭐ The others prove it can act; this proves it knows when it cannot |
 | ORD-1004 $64 | Verified lost, but a $64 refund already succeeded | **deny** — P2 + P7. Hard invariants hold |
 | ORD-1005 $120 | Verified lost, instrument `source_account_closed` | **require_approval** — policy has domain knowledge, not just arithmetic |
 | ORD-1021 | 4 days without a scan but **inside** SLA and before promise date | Detector must **NOT** fire |
@@ -351,36 +446,50 @@ opens it next Tuesday.
 | E3 | Auth matrix: no bearer → 401, wrong bearer → 401, correct bearer → 200 |
 
 **Deliberately not tested, said out loud in the README:** the UI, the Mongo driver, the seed generator,
-and tool-call ordering by a live model — the video plus the verbatim transcript is that evidence. An
-agentic eval asserting "no refund fired without a preceding verification and preview in-trace" is the
-named next step.
+and tool-call *ordering* by a live model — a captured client transcript is that evidence. An agentic
+eval asserting "no refund fired without a preceding verification and preview in-trace" is the named
+next step.
 
 ---
 
-## Committed drop order
+## 11 · Next steps
 
-If time runs out, cut in this order. Written down now so it isn't decided under pressure.
+### Before submitting — needs you
 
-1. Test E3 — merge its assertions into E1
-2. `/audit` page — the log is readable via `investigate.recent_actions[]` and `ops://audit/{id}`
-3. Scenario ORD-1005 + rule P6 — costs the gateway-semantics beat; P5 still proves non-arithmetic escalation
-4. The runbook resource and the `ops_triage_delayed_order` prompt
-5. The `/` page → becomes a README section
+- [ ] 11.1 **Capture a real MCP client transcript.** Run §10's walkthroughs in Claude Code, paste the
+      session into the README. This is the one piece of evidence I cannot honestly generate — it is
+      proof a live model uses the tools in the right order, which no test here asserts 🔒
+- [ ] 11.2 **Read `AI-WORKLOG.md` and correct it.** Written in your voice from the session record; you
+      are the only one who can confirm the division of responsibility is stated fairly 🔒
+- [ ] 11.3 **Send `docs/client/email-02-scope-confirmed.md`.** Drafted, unsent. It confirms the narrowed
+      scope and asks Deepak to correct one interpretation: where `deny` survives versus escalates
+- [ ] 11.4 Send a short progress note — the URL is live and connectable, here is the tool list
+- [ ] 11.5 **Submission email** — MCP URL, repo, README/DECISIONS/AI-WORKLOG links, and an honest
+      "what I did not finish"
+- [ ] 11.6 Final pass: `bun run verify:deployed`, then reset the demo data so the first reviewer gets
+      a clean dataset
 
-**Never dropped:** the policy engine · plan-gated writes · the carrier-verification precondition ·
-two-layer exactly-once · the approval queue · the append-only `action_log` · the tool *descriptions* ·
-tests U3/U4/U5/U8/U10/U11/I1/I3/E1 · README + DECISIONS + the video.
+### If there were another day — in priority order
+
+- [ ] 11.7 **An agentic eval.** Drive a real model against the server in a loop and assert no refund
+      fires without a preceding verification and preview in-trace. This is the single biggest gap:
+      every step is proven, the *sequence* under a live model is not
+- [ ] 11.8 **A claim reaper.** A crash between the ledger write and the audit completion leaves a plan
+      `claimed` and returning `IN_FLIGHT` forever. It cannot double-refund, but it is stuck
+- [ ] 11.9 **Per-operator tokens**, so audit attribution names real people rather than `demo-operator`.
+      Identity is currently attribution only; policy is identical for every caller
+- [ ] 11.10 **MCP elicitation** for clients that support it, so the approval prompt is protocol-native
+      rather than a web page. Cut because client support is uneven and the persisted queue degrades
+      more gracefully
+- [ ] 11.11 **A headless tool console** — server-render `tools/list` and generate a form per tool from
+      its `inputSchema`. No model, no key, no spend. This is what I would build instead of a chat UI
+- [ ] 11.12 **Widen the workflow** only once the above is done: payment-failure recovery is the natural
+      second, reusing the plan/policy/audit machinery unchanged
 
 ---
 
 ## Blocked on external input
 
-- [ ] **MongoDB Atlas connection URL** — the only thing blocking §2. Needed in **two** places:
-      1. `.env.local` → `MONGODB_URI=mongodb+srv://...` (gitignored; used by `bun run seed` and `next dev`)
-      2. Vercel production → `vercel env add MONGODB_URI production` (the deployed server reads this)
-
-      Atlas checklist while you're in there: **Network Access → allow `0.0.0.0/0`** (Vercel functions have
-      no static egress IPs outside Enterprise), and a DB user scoped to **one** database. Both are
-      disclosed in the README as accepted, scoped risk — synthetic data only.
+- [x] MongoDB Atlas URI set locally and in Vercel production; network access opened *(§2)*
 - [x] Vercel account linked, deployed to production under the personal scope *(§1.6)*
 - [x] GitHub repo `Musharrafjamal/mcp-commerce`, `main` pushed *(§1.2)*

@@ -46,6 +46,9 @@ Then try these three, in this order. They show the system doing three genuinely 
 If a tool call times out, the free-tier database was asleep — retry once. If a scenario has already been
 resolved by another reviewer, hit **Reset demo data** on the console.
 
+**[TASKS.md §10](./TASKS.md#10--how-to-test-it-step-by-step)** has the full walkthrough: five scenarios
+with the exact prompts, what to expect from each, and what to look for while it runs.
+
 ## The workflow
 
 ```
@@ -176,8 +179,10 @@ The tests exist to prove specific claims, not for coverage:
   field accepting an amount — then the entire workflow, including a replay that does not double-refund.
 
 **Not tested, and said out loud:** the UI, the Mongo driver, the seed generator, and tool-call *ordering*
-by a live model. The demo video is that evidence. An agentic eval asserting "no refund fired without a
-preceding verification and preview in-trace" is the obvious next step.
+by a live model. Every step is proven and the wire contract is proven; that a live model always verifies
+before previewing is not. Rule P3 makes the wrong order harmless — a refund without a fresh verification
+is refused — but an agentic eval asserting "no refund fired without a preceding verification in-trace"
+is the honest next step, and it is missing.
 
 ## Run locally
 
@@ -185,7 +190,7 @@ preceding verification and preview in-trace" is the obvious next step.
 bun install
 echo 'MONGODB_URI=<your atlas uri>'   >> .env.local
 echo 'MCP_BEARER_TOKEN=<any string>'  >> .env.local
-bun run seed        # prints a manifest that doubles as the demo script
+bun run seed        # prints a manifest of every planted scenario and its expected verdict
 bun run dev
 bun run verify:local
 ```
