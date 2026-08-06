@@ -7,6 +7,8 @@
  * Defaults to localhost with the .env.local token.
  */
 
+export {} // top-level await needs this file to be a module
+
 const URL_ = process.argv[2] ?? process.env.MCP_URL ?? 'http://localhost:3000/api/mcp'
 const TOKEN = process.argv[3] ?? process.env.MCP_BEARER_TOKEN ?? 'ops-demo-local-token'
 
@@ -56,12 +58,31 @@ async function rpc(method: string, params: unknown, token = TOKEN, id: number | 
 
 console.log(`\nverifying ${URL_}\n`)
 
+// ---- E0: the platform is not shadowing our server --------------------------
+// Vercel Deployment Protection answers EVERY request with 401, which makes the auth
+// matrix below pass for entirely the wrong reason. Assert we are talking to our own
+// server before trusting any 401 as ours.
+function isPlatformWall(body: unknown): boolean {
+  const s = typeof body === 'string' ? body : JSON.stringify(body ?? '')
+  return /vercel_auth|sso-api|Protected deployment|Authentication Required/i.test(s)
+}
+
+const wallProbe = await rpc('initialize', {}, '')
+check(
+  'E0   no platform auth wall in front of the server',
+  !isPlatformWall(wallProbe.body),
+  'Deployment Protection is ON — a reviewer\'s MCP client will never reach this server',
+)
+
 // ---- E3: auth matrix -------------------------------------------------------
-const noAuth = await rpc('initialize', {}, '')
-check('E3a  no bearer token is rejected', noAuth.status === 401, `got ${noAuth.status}`)
+check('E3a  no bearer token is rejected', wallProbe.status === 401 && !isPlatformWall(wallProbe.body), `got ${wallProbe.status}`)
 
 const badAuth = await rpc('initialize', {}, 'not-the-token')
-check('E3b  wrong bearer token is rejected', badAuth.status === 401, `got ${badAuth.status}`)
+check(
+  'E3b  wrong bearer token is rejected',
+  badAuth.status === 401 && !isPlatformWall(badAuth.body),
+  `got ${badAuth.status}`,
+)
 
 // ---- handshake -------------------------------------------------------------
 const init = await rpc('initialize', {

@@ -23,17 +23,35 @@ Graded as heavily as the code. Do not batch these to the end.
 
 *Before a single domain file. Doing this at hour 3 is how submissions die.*
 
-- [ ] 1.1 Scaffold: `bunx --bun shadcn@latest init --preset b6qeMW19Zg --template next --pointer`
-- [ ] 1.2 `git init`, first commit, push to GitHub (the "source repository" deliverable)
-- [ ] 1.3 `bun pm ls zod` → confirm **zod 4**. Resolve a transitive zod 3 now, not at hour 3
-- [ ] 1.4 Re-verify `mcp-handler` / `@modelcontextprotocol/*` versions against live docs, then
-      **exact-pin**. No carets — the MCP spec and these packages are days old and Vercel's own docs are stale
-- [ ] 1.5 `app/api/mcp/route.ts` with **one** hardcoded trivial tool + the static bearer check.
-      `runtime='nodejs'`, `dynamic='force-dynamic'`, `maxDuration=60`
-- [ ] 1.6 Deploy to **production**, not preview — Deployment Protection serves SSO HTML to non-browser clients
-- [ ] 1.7 Connect a real MCP client over HTTP with the bearer header; run `tools/list`; call the tool
-- [ ] 1.8 Commit `.mcp.json` (must include `"type":"http"`) for a one-step reviewer path
-- [ ] ✅ `tools/list` succeeds from a real client against the real production URL, with auth
+- [x] 1.1 Scaffold: `bunx --bun shadcn@latest init --preset b6qeMW19Zg --template next --pointer`
+      → Next 16.2.6 / React 19.2.4, scaffolded to a subfolder then moved to root
+- [x] 1.2 `git init`, first commit — **push to GitHub still pending** (`gh` CLI not installed)
+- [x] 1.3 `bun pm ls zod` → **no zod present at all**. Clean slate, no transitive v3 conflict. Added `zod@4.4.3`
+- [x] 1.4 Versions verified against the npm registry, not from memory:
+      `mcp-handler@2.1.0` (peers on `@modelcontextprotocol/server@^2.0.0`), `@modelcontextprotocol/server@2.0.0`,
+      `mongodb@7.5.0`. MCP pair installed with `--exact`. API confirmed by reading the installed `.d.ts`,
+      not the docs: `createMcpHandler(init, opts)`, `withMcpAuth(handler, verifyToken, {required})`,
+      `registerTool(name, {title, description, inputSchema, outputSchema, annotations}, cb)`
+- [x] 1.5 `app/api/mcp/route.ts` — spike tool `ops_ping`, constant-time bearer compare,
+      `runtime='nodejs'`, `dynamic='force-dynamic'`, `maxDuration=60`, HTML server card on `GET`+`text/html`
+- [x] 1.6 Deployed to **production** under the personal Vercel scope (not the Softwelve org — a take-home
+      belongs on a personal account). **R1 fired exactly as predicted:** Deployment Protection was on
+      (`ssoProtection: all_except_custom_domains`), so every request — including a correct one — got
+      Vercel's 401 SSO wall and a reviewer's client would never have reached the server. Disabled via
+      `PATCH /v9/projects/{id}` with `{"ssoProtection": null}`; there is no CLI command for it
+- [x] 1.7 Verified over raw JSON-RPC **against production** — `scripts/verify-mcp.ts`, 11/11 green.
+      Two real bugs caught and fixed on the way:
+      **(a)** the auth matrix was passing for the wrong reason — behind the SSO wall *everything* 401s,
+      so "no token rejected" and "wrong token rejected" were meaningless. Added assertion **E0**, which
+      fails if any platform wall sits in front of the server, and made E3a/E3b require that the 401 be
+      *ours*. **(b)** a trailing newline from piping the token into `vercel env add` made a correct token
+      compare unequal, surfacing as the same `"No authorization provided"` error as a missing header —
+      fixed by trimming in `verifyToken`
+- [x] 1.8 `.mcp.json` committed with `"type":"http"` + the demo bearer token (public by design — the
+      README publishes it so reviewers connect in one step; it guards synthetic data only)
+- [x] ✅ **Exit gate met.** `tools/list` succeeds against the real production URL, with auth:
+      `https://ops-copilot-musharraf008s-projects.vercel.app/api/mcp`
+      Browser `GET` returns the HTML server card (200, `text/html`) rather than a JSON-RPC 406
 
 ---
 

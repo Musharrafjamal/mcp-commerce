@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ops-copilot": {
+      "type": "http",
+      "url": "https://ops-copilot-musharraf008s-projects.vercel.app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ops-demo-12dc8b077e028dcc71526cb8"
+      }
+    }
+  }
+}

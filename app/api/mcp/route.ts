@@ -11,9 +11,11 @@ const SERVER_INFO = { name: 'ops-copilot', version: '0.1.0' }
 // ponytail: one shared static token, compared in constant time. Per-operator tokens
 // only matter once audit attribution needs to distinguish real people.
 function verifyToken(_req: Request, bearer?: string): AuthInfo | undefined {
-  const expected = process.env.MCP_BEARER_TOKEN
+  // trim(): env vars set through a CLI pipe pick up a trailing newline, which silently
+  // fails every comparison and looks exactly like a wrong token.
+  const expected = process.env.MCP_BEARER_TOKEN?.trim()
   if (!expected || !bearer) return undefined
-  if (!timingSafeEqual(bearer, expected)) return undefined
+  if (!timingSafeEqual(bearer.trim(), expected)) return undefined
   return {
     token: bearer,
     clientId: 'ops-console',
