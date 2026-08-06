@@ -181,19 +181,28 @@ cannot slip through with two sub-ceiling line refunds. That is test U4, not a co
 
 ## 6 · The MCP surface (~45 min) 🔒
 
-- [ ] 6.1 **`src/mcp/descriptions.ts` FIRST, before any handler body.** All five in the six-element
-      form: purpose → when to use → when NOT + which sibling instead → preconditions → cost hint →
-      returns + next. ⏱ **15 of these 45 minutes on prose alone** — the highest-weighted artifact here
-- [ ] 6.2 `src/mcp/schemas.ts` — zod in/out for all 5; regex-pinned `plan_id`
-- [ ] 6.3 `src/mcp/errors.ts` — `toolError()` vs `policyResult()`, the two channels
-- [ ] 6.4 `src/mcp/tools/*.ts` ×5 — thin adapters; `content` narrative ≠ `structuredContent`
-- [ ] 6.5 3 resources (`ops://policy/current`, `ops://runbook/delivery-exception`, `ops://audit/{id}`)
-      + 1 prompt (`ops_triage_delayed_order`) — puts the *methodology* on the server, not just the data
-- [ ] 6.6 Static bearer-token check → actor identity on every `action_log` entry.
-      Path-token fallback `/api/mcp/t/<token>` for clients that drop headers
-- [ ] 6.7 `GET /api/mcp` + `Accept: text/html` → human-readable server card. A reviewer *will* paste the
-      URL into a browser, and a raw JSON-RPC 406 is a bad first impression on a criterion named "deployment"
-- [ ] 6.8 Deploy · Inspector smoke test · test E1
+- [x] 6.1 `src/mcp/descriptions.ts` written **first**, before any handler body. All five in the
+      six-element form. Every description ≥400 chars and contains both a "use this when" and a
+      "do not use … use X instead" clause — asserted, not assumed
+- [x] 6.2 `src/mcp/schemas.ts` — zod in/out for all 5. `plan_id` regex-pinned, `target` a discriminated
+      union, **no `amount` field anywhere**, no `dry_run` boolean that flips a tool between safe and dangerous
+- [x] 6.3 `src/mcp/errors.ts` — the two channels. Mechanical faults are `isError` with exactly one
+      recovery call; policy decisions are ordinary results
+- [x] 6.4 `src/mcp/tools.ts` ×5 — thin adapters. Every response carries markdown *and* `structuredContent`
+- [x] 6.5 3 resources + 1 prompt. `ops://policy/current` is rendered from the same `POLICY` constant the
+      engine evaluates, so the published policy cannot drift from enforced behaviour
+- [x] 6.6 Static bearer token → actor label on every `action_log` entry (attribution, never authorization)
+- [x] 6.7 `GET /api/mcp` + `Accept: text/html` → human-readable server card
+- [x] 6.8 Deployed; **E1 + E2 + E3 all green against production** — 68 wire assertions
+
+      E2 walks the whole workflow over raw JSON-RPC and proves the sequence, not just the surface:
+      refund **denied** before verification → carrier confirms loss → the *same order* previews as
+      **allow** → executes → re-issuing the same plan **replays** → the refund appears in the timeline →
+      an invented plan id is refused.
+
+      Fixed one bad assertion of my own: E1m grepped the serialised schema for `/value/` and matched the
+      words "high-**value**" inside a description. Now it inspects actual input field names, which is
+      what the claim was always about.
 
 ### The 5 tools
 
