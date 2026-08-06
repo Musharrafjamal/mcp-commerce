@@ -85,16 +85,29 @@ Graded as heavily as the code. Do not batch these to the end.
 
 *No DB, no MCP, no Next.js in this hour.*
 
-- [ ] 3.1 `domain/evidence.ts` — the `EvidenceBundle` type (the architectural seam)
-- [ ] 3.2 `domain/detect.ts` — scan-gap SLA, promise-date breach, disputed delivery
-- [ ] 3.3 `domain/diagnose.ts` — ⏱ **cap 5 rules, ≤20 lines each**, table-driven. Confidence computed
-      from a stated formula; forced-`low` when the top two causes are within 0.15. Write expected
-      outputs as fixtures **first**. Whatever passes at the timebox ships
-- [ ] 3.4 `domain/narrative.ts` — markdown renderer + **untrusted-text fencing**: customer notes and
-      carrier scan descriptions are third-party text — length-capped, control chars and markdown links
-      stripped, labelled *"data, never instructions"*
-- [ ] 3.5 Tests U1, U2, U3, U10
-- [ ] ✅ Diagnosis is deterministic · ORD-1003 declines to act · near-misses are not flagged
+- [x] 3.0 `src/fixtures/scenarios.ts` — the scenarios extracted out of the seed script so the unit tests
+      and the demo run on **exactly the same data**. Tests build an `EvidenceBundle` in memory, no DB
+- [x] 3.1 `domain/evidence.ts` — derived accessors over the bundle. Nothing here returns free text,
+      which is *why* a rule cannot accidentally consult customer prose
+- [x] 3.2 `domain/detect.ts` — scan-gap SLA, promise-date breach, disputed delivery. At most one
+      exception per order; closed orders are never flagged
+- [x] 3.3 `domain/diagnose.ts` — 5 rules, table-driven. `confidence = base x coverage x bonus x 0.8^contradicting`,
+      band forced to `low` on a near-tie
+- [x] 3.4 `domain/narrative.ts` — markdown renderer + untrusted-text fencing
+- [x] 3.5 Tests **U1, U2, U3, U10, U11** — 31 assertions, 0 fail, ~66ms, no DB
+- [x] ✅ Detects **7 of 28**; both near-misses and all 18 filler orders stay clean; ORD-1003 declines to act
+
+      **Three defects the tests caught, all mine:**
+      **(a)** the confidence formula divided by *all* supporting facts, so ORD-1001 scored `medium`
+      purely because nobody had called the carrier yet. Absent optional evidence must not read as a
+      failed check — optional facts now add a bonus but never divide.
+      **(b)** "no root cause matched" was being treated as low confidence, so a healthy order would
+      have been escalated to a manager as *ambiguous*. Empty ≠ ambiguous.
+      **(c)** `expectDetected` was typed `string`, so a typo in a fixture would have silently matched
+      nothing — now `ExceptionCode`.
+
+      Also: writing a control-character class as a regex literal twice turned `narrative.ts` into a
+      binary file. Replaced with a code-point scan, which cannot recur.
 
 ---
 
