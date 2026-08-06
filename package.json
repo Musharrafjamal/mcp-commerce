@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "ops-copilot",
   "version": "0.0.1",
   "type": "module",
@@ -11,6 +11,7 @@
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
+    "seed": "bun --env-file=.env.local scripts/seed.ts",
     "verify:local": "bun run scripts/verify-mcp.ts",
     "verify:deployed": "bun run scripts/verify-mcp.ts $MCP_URL $MCP_BEARER_TOKEN"
   },
@@ -21,7 +22,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^1.28.0",
     "mcp-handler": "2.1.0",
-    "mongodb": "^7.5.0",
+    "mongodb": "^6",
     "next": "16.2.6",
     "next-themes": "^0.4.6",
     "react": "19.2.4",
@@ -44,3 +45,4 @@
     "typescript": "^5"
   }
 }
+

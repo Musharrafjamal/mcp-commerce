@@ -60,16 +60,24 @@ Graded as heavily as the code. Do not batch these to the end.
 
 *5 collections. Inventory dropped per client instruction.*
 
-- [ ] 2.1 `src/domain/types.ts` — Money (integer minor units), Order (embedded lines + customer
-      snapshot), Payment (embedded transactions), Shipment (embedded scans + `carrierVerification`),
-      OrderEvent, ActionLogEntry, EvidenceBundle
-- [ ] 2.2 `src/db/client.ts` — `globalThis`-cached MongoClient, `maxPoolSize:10`, `minPoolSize:0`,
-      `serverSelectionTimeoutMS:5000` (a sleeping M0 must fail fast, not hang inside the reviewer's client)
-- [ ] 2.3 `src/db/collections.ts` typed accessors + `src/db/indexes.ts` (idempotent `createIndex`)
-- [ ] 2.4 `scripts/seed.ts` — deterministic PRNG (`mulberry32(0xC0FFEE)`), env-overridable `SEED_NOW`,
-      **literal** fixtures + 19 noise orders
-- [ ] 2.5 Seed prints a **manifest** — doubles as the demo script and the test expectation table
-- [ ] ✅ `bun run seed` runs clean twice in a row
+- [x] 2.0 ⚠️ **`mongodb@7.5.0` does not load under Bun** — `bson` calls `v8.startupSnapshot.isBuildingSnapshot()`,
+      unimplemented in Bun 1.3.4. Broke on both the CJS and ESM paths. Node was fine, so production was
+      never at risk, but `bun test` needs the driver for the §5 integration tests. **Pinned `mongodb@^6`
+      (6.21.0), which loads cleanly under Bun** — and is what the research recommended in the first place
+- [x] 2.1 `src/domain/types.ts` — Money as integer minor units, Order (embedded lines + customer
+      snapshot), Payment (embedded transactions), Shipment (embedded scans + `carrierVerification`
+      + `simCarrierTruth`), OrderEvent, ActionLogEntry, EvidenceBundle.
+      Deliberately **no** `totals.refunded` field — derived from the payment ledger
+- [x] 2.2 `src/db/client.ts` — `globalThis`-cached MongoClient in both envs, `maxPoolSize:10`,
+      `minPoolSize:0`, `serverSelectionTimeoutMS:5000`, `.trim()` on the URI
+- [x] 2.3 `src/db/collections.ts` typed accessors + `src/db/indexes.ts` (idempotent, no TTL on `action_log`)
+- [x] 2.4 `scripts/seed.ts` — `mulberry32(0xC0FFEE)`, env-overridable `SEED_NOW`, 10 **literal** fixtures
+      + 18 filler orders = 28 orders / 203 events
+- [x] 2.5 Seed prints the **manifest** — doubles as the demo script and the test expectation table
+- [x] ✅ `bun run seed` clean twice in a row; `tsc --noEmit` exit 0
+
+      Note: the URI you supplied has no database in its path, so the DB name is set in code
+      (`opscopilot`, overridable via `MONGODB_DB`) rather than parsed from the connection string.
 
 ---
 
