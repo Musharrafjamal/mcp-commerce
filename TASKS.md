@@ -25,7 +25,8 @@ Graded as heavily as the code. Do not batch these to the end.
 
 - [x] 1.1 Scaffold: `bunx --bun shadcn@latest init --preset b6qeMW19Zg --template next --pointer`
       → Next 16.2.6 / React 19.2.4, scaffolded to a subfolder then moved to root
-- [x] 1.2 `git init`, first commit — **push to GitHub still pending** (`gh` CLI not installed)
+- [x] 1.2 `git init`, commits pushed to `github.com/Musharrafjamal/mcp-commerce` (branch renamed
+      `master` → `main` while the remote was still empty)
 - [x] 1.3 `bun pm ls zod` → **no zod present at all**. Clean slate, no transitive v3 conflict. Added `zod@4.4.3`
 - [x] 1.4 Versions verified against the npm registry, not from memory:
       `mcp-handler@2.1.0` (peers on `@modelcontextprotocol/server@^2.0.0`), `@modelcontextprotocol/server@2.0.0`,
@@ -318,6 +319,12 @@ tests U3/U4/U5/U8/U10/U11/I1/I3/E1 · README + DECISIONS + the video.
 
 ## Blocked on external input
 
-- [ ] MongoDB Atlas connection URL → `.env.local` as `MONGODB_URI` *(needed at §2)*
-- [ ] Vercel account linked for the production deploy *(needed at §1.6)*
-- [ ] GitHub repo for the source-repository deliverable *(needed at §1.2)*
+- [ ] **MongoDB Atlas connection URL** — the only thing blocking §2. Needed in **two** places:
+      1. `.env.local` → `MONGODB_URI=mongodb+srv://...` (gitignored; used by `bun run seed` and `next dev`)
+      2. Vercel production → `vercel env add MONGODB_URI production` (the deployed server reads this)
+
+      Atlas checklist while you're in there: **Network Access → allow `0.0.0.0/0`** (Vercel functions have
+      no static egress IPs outside Enterprise), and a DB user scoped to **one** database. Both are
+      disclosed in the README as accepted, scoped risk — synthetic data only.
+- [x] Vercel account linked, deployed to production under the personal scope *(§1.6)*
+- [x] GitHub repo `Musharrafjamal/mcp-commerce`, `main` pushed *(§1.2)*
