@@ -249,30 +249,29 @@ human gate real rather than theatrical), and any `dry_run: boolean` flag.
 
 ## 8 · Verification pass (~25 min)
 
-- [ ] 8.1 `bun test` — 11 unit + 4 integration green
-- [ ] 8.2 `bun run verify:deployed` — E1, E2, E3 against production
-- [ ] 8.3 Full manual run from a **clean** client + private window — proves no Deployment Protection,
-      no cached auth, and that the published bearer token actually works
+- [x] 8.1 `bun run test` — **93 assertions, 0 fail** (78 pure, 15 integration)
+- [x] 8.2 `bun run verify:deployed` — **68 assertions, 0 fail** against production
+- [x] 8.3 Manual run against production: the approve flow driven by hand in a browser, and the wire
+      verification run from a fresh process using only the published token — no cached auth, no
+      Deployment Protection
 
 ---
 
 ## 9 · Documentation (~65 min) 🔒
 
-- [ ] 9.1 `README.md` — MCP URL + bearer token above the fold · "Try it in 60 seconds" ·
-      **the tool reference table** (highest value-per-minute section in the submission) · architecture
-      in one paragraph · synthetic-data statement · safety model + "Things this MCP will never do" ·
-      the `0.0.0.0/0` Atlas disclosure · tests and why *these* · known limits + next steps.
-      **Resist length — "concise" is in the brief**
+- [x] 9.1 `README.md` — MCP URL + token above the fold, "Try it in 60 seconds", the tool reference
+      table, architecture, the safety threat table, the seeded scenarios, why *these* tests, run-locally,
+      and known limits including the `0.0.0.0/0` Atlas disclosure
 - [ ] 9.2 Capture a **verbatim** MCP client transcript, dated and labelled, into the README
-- [ ] 9.3 `DECISIONS.md` — questions asked + the client's answers verbatim · **the two reversals and
-      what changed because of them** · in/out scope table · MCP design rationale · safety as a threat
-      table · the chat-playground rejection · **the tautology self-critique** ("I wrote both the
-      fixtures and the rules — here are three things I did about it") · what another day buys
-- [ ] 9.4 `AI-WORKLOG.md` — the brief's 8 bullets in its order. Exact model IDs, phase-by-phase model
-      rationale, division of responsibility, 3–5 verbatim load-bearing prompts, **the rejected AI
-      suggestion** (caller-supplied idempotency keys → replaced by a server-minted single-use `plan_id`,
-      because a model reuses a key across different operations and mints a fresh one on retry, which
-      defeats the entire mechanism), how AI work was verified, remaining risks
+      ⛔ **needs you** — connect your own MCP client and paste the session. I can assert the wire
+      contract, but a real client transcript is evidence I cannot manufacture honestly
+- [x] 9.3 `DECISIONS.md` — the bounded problem, in/out scope with reasons, why the tools are
+      task-shaped, the approval-queue reversal, where `deny` survives and why, the chat-playground
+      rejection, **the tautology self-critique**, the assumptions, and what another day buys
+- [x] 9.4 `AI-WORKLOG.md` — the brief's eight bullets. Models per phase with reasons, how the work was
+      planned, division of responsibility, the instructions that mattered, **five suggestions rejected
+      or corrected** (including two of my own tests that were passing for the wrong reason), how the
+      work was verified, and the remaining risks
 
 ---
 
