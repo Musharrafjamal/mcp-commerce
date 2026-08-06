@@ -1,8 +1,8 @@
 /**
  * Put one refund into the approval queue, so `/approvals` has something in it.
  *
- * Useful before recording a demo, and as a smoke test that the escalation path writes
- * everything the approvals UI needs.
+ * Useful when walking someone through the approvals UI, and as a smoke test that the
+ * escalation path writes everything that UI needs.
  *
  *   bun run scripts/demo-approval.ts [ORD-1002]
  */
