@@ -46,8 +46,10 @@ Then try these three, in this order. They show the system doing three genuinely 
 If a tool call times out, the free-tier database was asleep — retry once. If a scenario has already been
 resolved by another reviewer, hit **Reset demo data** on the console.
 
-**[TASKS.md §10](./TASKS.md#10--how-to-test-it-step-by-step)** has the full walkthrough: five scenarios
-with the exact prompts, what to expect from each, and what to look for while it runs.
+**The deployed console is the full guide** — [ops-copilot-musharraf008s-projects.vercel.app](https://ops-copilot-musharraf008s-projects.vercel.app).
+It explains the problem, why it is harder than it looks, and then walks five scenarios with
+copy-to-clipboard prompts, what to expect from each, and what to look for while it runs. The same
+walkthrough is mirrored in [TASKS.md §10](./TASKS.md#10--how-to-test-it-step-by-step).
 
 ## The workflow
 
