@@ -3,7 +3,8 @@
 import { useState } from 'react'
 
 /**
- * The one piece of client state in the app.
+ * Client state stays at the edges: this copy button and the reset button
+ * (components/reset-demo.tsx).
  *
  * It earns its place: the whole page exists to be copied out of, and asking a reviewer
  * to hand-select a multi-line command is friction on the first thing they do.

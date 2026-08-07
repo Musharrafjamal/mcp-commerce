@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { Shell } from '@/components/shell'
-import { Button } from '@/components/ui/button'
 import { Prompt, Snippet } from '@/components/copy'
-import { reseedAction } from './approvals/actions'
+import { ResetDemo } from '@/components/reset-demo'
 
 export const dynamic = 'force-dynamic'
 
@@ -252,14 +251,7 @@ confirm      ops_investigate_delivery_exception   re-run to check the outcome`}
         scenario or an empty approvals queue means someone got here before you — reset below.
       </p>
 
-      <form action={reseedAction} className="mt-5">
-        <Button type="submit" variant="outline">
-          Reset demo data
-        </Button>
-      </form>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Restores all 28 synthetic orders. Safe to run at any time.
-      </p>
+      <ResetDemo />
     </Shell>
   )
 }

@@ -30,10 +30,17 @@ export async function decideAction(formData: FormData) {
   redirect(`/approvals/${actionId}`)
 }
 
-export async function reseedAction() {
-  await reseedDemoData()
-  revalidatePath('/')
-  revalidatePath('/approvals')
-  revalidatePath('/audit')
-  redirect('/approvals')
+export type ReseedState = { ok: boolean; orders?: number; error?: string } | null
+
+/** Stays on the page and reports back — the button renders the outcome inline. */
+export async function reseedAction(_prev: ReseedState, _formData: FormData): Promise<ReseedState> {
+  try {
+    const { orders } = await reseedDemoData()
+    revalidatePath('/')
+    revalidatePath('/approvals')
+    revalidatePath('/audit')
+    return { ok: true, orders }
+  } catch {
+    return { ok: false, error: 'Reset failed — the free-tier database may be waking up. Try once more.' }
+  }
 }
