@@ -127,6 +127,26 @@ check('E3a  no bearer token is rejected', wallProbe.status === 401 && !isPlatfor
 const badAuth = await rpc('initialize', {}, 'not-the-token')
 check('E3b  wrong bearer token is rejected', badAuth.status === 401 && !isPlatformWall(badAuth.body), `got ${badAuth.status}`)
 
+// The D-007 path-token fallback, for clients that cannot send a custom header
+// (claude.ai custom connectors among them). A bare fetch rather than rpc(): this
+// must not share the main run's session, and must send NO Authorization header.
+async function pathInit(token: string) {
+  return fetch(`${URL_.replace(/\/$/, '')}/t/${token}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 9001,
+      method: 'initialize',
+      params: { protocolVersion: PROTOCOL_VERSION, capabilities: {}, clientInfo: { name: 'verify-mcp', version: '1.0.0' } },
+    }),
+  })
+}
+const viaPath = await pathInit(TOKEN)
+check('E3d  path-token fallback authenticates with no header', viaPath.status === 200, `got ${viaPath.status}`)
+const viaBadPath = await pathInit('not-the-token')
+check('E3e  a wrong path token gets the same 401', viaBadPath.status === 401, `got ${viaBadPath.status}`)
+
 // ---------------------------------------------------------------------------
 // handshake
 // ---------------------------------------------------------------------------

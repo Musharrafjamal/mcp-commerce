@@ -252,3 +252,26 @@ rewriting history, and the submission email states the same thing in the same wo
 - The offer stands in the submission email: a video recorded and sent same-day on request.
 - Known cost: the one submission item the brief lists that this repo does not contain, and it is a
   demo-format item, not a substance one. Accepted.
+
+---
+
+### D-011 · D-007's path-token fallback existed only on paper — found by a real client, built same day
+
+**Date:** 2026-08-07 **Status:** Decided **Decided by:** Musharraf
+
+**Found how:** connecting claude.ai as a custom connector. Its dialog cannot send a custom
+`Authorization` header — exactly the client class D-007 predicted — and the fallback D-007 documented
+(`/api/mcp/t/<token>`), which `email-02`'s commitments table claimed was verified by E3, **had never
+been implemented**. The docs promised a route the server did not serve; a reviewer following them would
+have hit a 404.
+
+**Fix:** `app/api/mcp/t/[token]/route.ts` — the token is lifted from the path into the bearer header
+and the request delegates to the same authed handler, so verification stays in exactly one place and a
+wrong path token gets the same 401 as a wrong header. Assertions `E3d`/`E3e` added to
+`scripts/verify-mcp.ts` (73 → 75), making the "verified by E3" claim true rather than deleting it.
+
+**Tradeoff, accepted for a public demo token:** a credential in a URL is a credential in every access
+log along the way.
+
+**Lesson recorded:** the wire suite verified everything the docs said about routes that existed; nothing
+verified that every route the docs promised existed. E3d is that check now.

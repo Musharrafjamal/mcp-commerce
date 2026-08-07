@@ -33,7 +33,10 @@ claude mcp add --transport http ops-copilot \
 ```
 
 **MCP Inspector** — `npx @modelcontextprotocol/inspector`, transport *Streamable HTTP*, paste the URL
-and the header. **Any other client** — the repo's `.mcp.json` has the config verbatim.
+and the header. **claude.ai** — custom connectors cannot send a custom header; add the path-token URL
+instead, with the OAuth fields left empty:
+`https://ops-copilot-musharraf008s-projects.vercel.app/api/mcp/t/ops-demo-12dc8b077e028dcc71526cb8`.
+**Any other client** — the repo's `.mcp.json` has the config verbatim.
 
 Then try these three, in this order. They show the system doing three genuinely different things:
 
@@ -156,7 +159,7 @@ offsets from a single `SEED_NOW` — so "a 9-day scan gap" is still 9 days whene
 
 ```bash
 bun run test              # 93 assertions: 78 pure, 15 against a separate test database
-bun run verify:deployed   # 73 assertions over raw JSON-RPC against production
+bun run verify:deployed   # 75 assertions over raw JSON-RPC against production
 ```
 
 The tests exist to prove specific claims, not for coverage:

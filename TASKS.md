@@ -394,7 +394,7 @@ refusal to pick.
 
 ### Run the checks yourself
 
-- [ ] 10.16 `bun run verify:deployed` — 73 assertions over raw JSON-RPC against production
+- [ ] 10.16 `bun run verify:deployed` — 75 assertions over raw JSON-RPC against production
 - [ ] 10.17 `bun run test` — 93 assertions (needs `MONGODB_URI` in `.env.local`)
 
 ---
@@ -423,7 +423,7 @@ opens it next Tuesday.
 ## Test list — 18 named checks
 
 Each id below is a named claim, not a single `expect()`. They expand to **93 assertions** under
-`bun run test` and **73** under `bun run verify:deployed`.
+`bun run test` and **75** under `bun run verify:deployed`.
 
 **Unit (11)** — pure, no DB, <1s
 
@@ -478,7 +478,8 @@ next step.
 - [x] 11.3 **Submission email** — same item as §0.4, drafted as `docs/client/email-03-submission.md`;
       sending it is the submission 🔒
 - [x] 11.4 Final pass done: `bun run lint`, `bun run typecheck`, `bun run build`, `bun run test` (93),
-      `bun run verify:deployed` (73), all four live routes 200, and the demo data reseeded clean
+      `bun run verify:deployed` (75, including the D-007 path-token fallback), all four live routes
+      200, and the demo data reseeded clean
 
 ### If there were another day — in priority order
 

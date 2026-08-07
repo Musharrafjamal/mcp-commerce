@@ -95,7 +95,7 @@ Nothing here is verified by reading the code and finding it plausible.
 
 - **93 assertions.** 78 pure functions with no database and no MCP client, 15 integration tests against a
   separate `opscopilot_test` database so a run can never touch demo data.
-- **73 assertions over raw JSON-RPC against the deployed URL**, deliberately without the MCP client SDK,
+- **75 assertions over raw JSON-RPC against the deployed URL**, deliberately without the MCP client SDK,
   so what is asserted is the wire contract a reviewer's client will actually hit. This walks the whole
   workflow: refused before verification, carrier confirms, same order allowed, executes, re-issue
   replays, refund visible on re-investigation.

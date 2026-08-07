@@ -24,7 +24,7 @@ shallow detectors instead of one credible investigation.
 A remotely hosted TypeScript MCP server on Vercel; five task-shaped tools, three resources and one
 prompt; deterministic server-side detection and diagnosis; a nine-rule policy engine; plan-gated writes
 that perform **real mutations**; two-layer exactly-once; a manager-approval queue; an append-only audit
-log; a deliberately plain console; 93 assertions plus 73 over the wire.
+log; a deliberately plain console; 93 assertions plus 75 over the wire.
 
 ### Out of scope, and why
 
