@@ -11,7 +11,7 @@
  * it); the ledger cannot.
  */
 
-import { usd, type ComputedRefund, type EvidenceBundle, type RefundTarget } from './types'
+import { formatMoney, usd, type ComputedRefund, type EvidenceBundle, type RefundTarget } from './types'
 import { capturedTotal, captureTxn, refundedTotal, remainingRefundable } from './evidence'
 
 export class RefundComputationError extends Error {
@@ -68,7 +68,10 @@ export function computeRefund(b: EvidenceBundle, target: RefundTarget): Computed
   if (requestedMinor <= 0) {
     throw new RefundComputationError(
       'NOTHING_REFUNDABLE',
-      `Order ${b.order._id} has nothing left to refund: ${already.minor} of ${captured.minor} minor units already refunded.`,
+      // Formatted, not raw minor units: this string is read by an agent and quoted to
+      // an operator. "6332 minor units" is our storage detail, not their language.
+      `Order ${b.order._id} has nothing left to refund — ${formatMoney(already)} of ` +
+        `${formatMoney(captured)} captured has already been refunded, whatever the order status says.`,
     )
   }
 

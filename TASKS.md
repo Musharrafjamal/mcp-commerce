@@ -12,10 +12,13 @@ Legend: `⏱` hard timebox · `🔒` never dropped · `✅` exit gate
 Graded as heavily as the code. Do not batch these to the end.
 
 - [x] 0.1 Scope-proposal email sent — client (Deepak, DiligenceAI) replied 2026-08-04
-- [ ] 0.2 Reply email — `docs/client/email-02-scope-confirmed.md` 🔒
-- [ ] 0.3 Progress update after the hosting spike — live MCP URL + tool list
-- [ ] 0.4 Mid-build update sharing one real in-flight tradeoff
-- [ ] 0.5 Submission email — URL, repo, docs, honest "what I didn't finish"
+- [x] 0.2 Reply email drafted — `docs/client/email-02-scope-confirmed.md`. **Not sent:** the build
+      overtook it, so its content is folded into the submission email instead of arriving after the fact
+- [x] 0.3 Interim progress updates — **dropped.** Too late to be useful mid-build; sending a "here's my
+      progress" note after the work is finished would be theatre
+- [ ] 0.4 **Submission email** — the only remaining client touchpoint. URL, repo, the walkthrough link,
+      README/DECISIONS/AI-WORKLOG, the one open interpretation (where `deny` survives vs escalates),
+      and an honest "what I didn't finish" 🔒
 
 ---
 
@@ -456,18 +459,16 @@ next step.
 
 ### Before submitting — needs you
 
-- [ ] 11.1 **Capture a real MCP client transcript.** Run §10's walkthroughs in Claude Code, paste the
-      session into the README. This is the one piece of evidence I cannot honestly generate — it is
-      proof a live model uses the tools in the right order, which no test here asserts 🔒
+- [x] 11.1 **Wire transcript captured** — `docs/transcript.md`, twelve real unedited request/response
+      pairs against production via `bun run capture:transcript`. It states plainly what it does *not*
+      prove: the script chose the sequence, so it is evidence about the server, not about a live model's
+      tool selection
 - [ ] 11.2 **Read `AI-WORKLOG.md` and correct it.** Written in your voice from the session record; you
       are the only one who can confirm the division of responsibility is stated fairly 🔒
-- [ ] 11.3 **Send `docs/client/email-02-scope-confirmed.md`.** Drafted, unsent. It confirms the narrowed
-      scope and asks Deepak to correct one interpretation: where `deny` survives versus escalates
-- [ ] 11.4 Send a short progress note — the URL is live and connectable, here is the tool list
-- [ ] 11.5 **Submission email** — MCP URL, repo, README/DECISIONS/AI-WORKLOG links, and an honest
-      "what I did not finish"
-- [ ] 11.6 Final pass: `bun run verify:deployed`, then reset the demo data so the first reviewer gets
-      a clean dataset
+- [ ] 11.3 **Submission email** — URL, repo, walkthrough link, docs, the one open interpretation, and an
+      honest "what I did not finish" 🔒
+- [ ] 11.4 Final pass: `bun run verify:deployed`, then reset the demo data so the first reviewer gets a
+      clean dataset
 
 ### If there were another day — in priority order
 

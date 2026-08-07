@@ -14,7 +14,8 @@
     "test:unit": "bun test tests/unit --timeout 30000",
     "seed": "bun --env-file=.env.local scripts/seed.ts",
     "verify:local": "bun run scripts/verify-mcp.ts",
-    "verify:deployed": "bun --env-file=.env.local run scripts/verify-mcp.ts https://ops-copilot-musharraf008s-projects.vercel.app/api/mcp"
+    "verify:deployed": "bun --env-file=.env.local run scripts/verify-mcp.ts https://ops-copilot-musharraf008s-projects.vercel.app/api/mcp",
+    "capture:transcript": "bun --env-file=.env.local run scripts/capture-transcript.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

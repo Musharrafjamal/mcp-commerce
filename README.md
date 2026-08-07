@@ -180,11 +180,16 @@ The tests exist to prove specific claims, not for coverage:
   *use this* and a *do not use* clause, input **and** output schemas, all four annotations, no input
   field accepting an amount — then the entire workflow, including a replay that does not double-refund.
 
+**[`docs/transcript.md`](./docs/transcript.md)** is a captured wire transcript — twelve real, unedited
+request/response pairs against the deployed server, covering the happy path, the replay, the premature
+refusal, the undecidable case and two rejected attacks. Regenerate it with `bun run capture:transcript`.
+
 **Not tested, and said out loud:** the UI, the Mongo driver, the seed generator, and tool-call *ordering*
 by a live model. Every step is proven and the wire contract is proven; that a live model always verifies
-before previewing is not. Rule P3 makes the wrong order harmless — a refund without a fresh verification
-is refused — but an agentic eval asserting "no refund fired without a preceding verification in-trace"
-is the honest next step, and it is missing.
+before previewing is not — the transcript's sequence was chosen by a script, and it says so. Rule P3
+makes the wrong order harmless, since a refund without a fresh verification is refused. But an agentic
+eval asserting "no refund fired without a preceding verification in-trace" is the honest next step, and
+it is missing.
 
 ## Run locally
 
