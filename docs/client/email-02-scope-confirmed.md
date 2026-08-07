@@ -2,7 +2,7 @@
 
 **To:** Deepak, DiligenceAI Team
 **Date:** 2026-08-05
-**Status:** ready to send
+**Status:** never sent — the build overtook it; its content is folded into `email-03-submission.md`
 **In reply to:** their 2026-08-04 answers to Q1–Q5 (see `email-01-scope-proposal.md`)
 
 ---

@@ -38,6 +38,7 @@ log; a deliberately plain console; 93 assertions plus 73 over the wire.
 | An in-app LLM chat playground | See below — the most interesting exclusion. |
 | CI/CD | Explicitly not expected. `bun run test` and `bun run verify:deployed`. |
 | Frontend polish | The console is the approval boundary, not a product surface. |
+| The 4–5 minute demo video | Cut for time on the final day — my call, not a client agreement. The deployed console walkthrough and `docs/transcript.md` stand in. See D-010, which also corrects an inaccurate commit message that claimed otherwise. |
 
 ---
 
@@ -108,8 +109,8 @@ but they also said *"do not exceed the paid amount"*, which no manager approval 
 - **`require_approval`** for every judgment call: over the ceiling, low confidence, a disputed delivery,
   a dead payment instrument.
 
-This reading was sent back to the client as a one-line change if wrong. It is the one interpretation in
-the build that is mine rather than theirs.
+This reading is raised to the client in the submission email as a one-line change if wrong. It is the
+one interpretation in the build that is mine rather than theirs.
 
 ### A refusal is not an error
 

@@ -16,9 +16,10 @@ Graded as heavily as the code. Do not batch these to the end.
       overtook it, so its content is folded into the submission email instead of arriving after the fact
 - [x] 0.3 Interim progress updates — **dropped.** Too late to be useful mid-build; sending a "here's my
       progress" note after the work is finished would be theatre
-- [ ] 0.4 **Submission email** — the only remaining client touchpoint. URL, repo, the walkthrough link,
-      README/DECISIONS/AI-WORKLOG, the one open interpretation (where `deny` survives vs escalates),
-      and an honest "what I didn't finish" 🔒
+- [x] 0.4 **Submission email** — drafted as `docs/client/email-03-submission.md`, ready to paste and
+      send. URL, repo, the walkthrough link, README/DECISIONS/AI-WORKLOG, the one open interpretation
+      (where `deny` survives vs escalates), and an honest "what I didn't finish" — including the video
+      cut and the D-010 correction 🔒
 
 ---
 
@@ -472,9 +473,10 @@ next step.
       pairs against production via `bun run capture:transcript`. It states plainly what it does *not*
       prove: the script chose the sequence, so it is evidence about the server, not about a live model's
       tool selection
-- [ ] 11.2 **Read `AI-WORKLOG.md` and correct it.** Written in your voice from the session record; you
+- [x] 11.2 **Read `AI-WORKLOG.md` and correct it.** Written in your voice from the session record; you
       are the only one who can confirm the division of responsibility is stated fairly 🔒
-- [ ] 11.3 **Submission email** — same item as §0.4, the only remaining client touchpoint 🔒
+- [x] 11.3 **Submission email** — same item as §0.4, drafted as `docs/client/email-03-submission.md`;
+      sending it is the submission 🔒
 - [x] 11.4 Final pass done: `bun run lint`, `bun run typecheck`, `bun run build`, `bun run test` (93),
       `bun run verify:deployed` (73), all four live routes 200, and the demo data reseeded clean
 

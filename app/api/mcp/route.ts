@@ -15,7 +15,7 @@ const SERVER_INFO = { name: 'ops-copilot', version: '1.0.0' }
  * in src/domain, every write in src/services.
  */
 
-// ponytail: one shared static token, per the client's instruction ("a static bearer
+// Deliberate simplification: one shared static token, per the client's instruction ("a static bearer
 // token; no custom authentication system is needed"). Constant-time compare so the
 // check does not leak the token a character at a time.
 function verifyToken(_req: Request, bearer?: string): AuthInfo | undefined {

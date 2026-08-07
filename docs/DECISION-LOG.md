@@ -222,3 +222,33 @@ misses: agent hits `STALE_PLAN`, re-previews, re-executes.
 
 **Consequence:** the agent cannot supply a dollar amount, a quantity, or an idempotency key on any tool.
 There is no field for it. Proven by tests U9 and I1.
+
+---
+
+### D-010 · Demo video cut on submission day — and a correction to the record
+
+**Date:** 2026-08-07 **Status:** Decided **Decided by:** Musharraf
+
+**Question:** The brief lists a four-to-five-minute asynchronous demo video as a submission item. On the
+final day there was no time left to record one well. Record a rough take, or cut it?
+
+**Options considered:**
+- **A. One rough take** — the §10 shot-by-shot script existed and targeted 4:30; roughly 45 minutes for
+  a single unpolished pass.
+- **B. Cut the deliverable** — let the deployed console walkthrough and the captured wire transcript
+  stand as the asynchronous demo, and say so plainly in the submission email.
+
+**Chosen:** B, on time grounds alone.
+
+**Correction:** commit `2233d45` described the cut as *"out of scope by agreement with the client."*
+That was wrong. No such agreement exists anywhere in the thread — the cut was unilateral, made under
+time pressure. Per this log's own rule the record is corrected by this superseding entry rather than by
+rewriting history, and the submission email states the same thing in the same words.
+
+**Consequences:**
+- The asynchronous demo is the deployed console walkthrough (five scenarios with copy-to-clipboard
+  prompts and expected outcomes, mirrored in `TASKS.md` §10) plus `docs/transcript.md` (twelve unedited
+  request/response pairs captured against production).
+- The offer stands in the submission email: a video recorded and sent same-day on request.
+- Known cost: the one submission item the brief lists that this repo does not contain, and it is a
+  demo-format item, not a substance one. Accepted.
