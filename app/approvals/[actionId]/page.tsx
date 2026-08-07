@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation'
 import { Shell, Verdict } from '@/components/shell'
-import { Button } from '@/components/ui/button'
+import { DecideForm } from '@/components/decide-form'
 import { getAction } from '@/src/services/approvals'
 import { formatMoney } from '@/src/domain/types'
-import { decideAction } from '../actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,44 +70,7 @@ export default async function ApprovalDetail({ params }: { params: Promise<{ act
       )}
 
       {open ? (
-        <form action={decideAction} className="mt-8 space-y-3 rounded border p-4">
-          <input type="hidden" name="action_id" value={a._id} />
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="text-sm">
-              <span className="mb-1 block text-xs text-muted-foreground">Your name or email</span>
-              <input
-                name="decided_by"
-                defaultValue="demo-manager"
-                className="w-full rounded border bg-background px-3 py-2 text-sm"
-              />
-            </label>
-          </div>
-          <label className="block text-sm">
-            <span className="mb-1 block text-xs text-muted-foreground">
-              Decision note (required, for approvals and rejections alike)
-            </span>
-            <textarea
-              name="note"
-              required
-              rows={3}
-              placeholder="Why is this the right call?"
-              className="w-full rounded border bg-background px-3 py-2 text-sm"
-            />
-          </label>
-          <div className="flex gap-2">
-            <Button type="submit" name="verdict" value="approve">
-              Approve refund
-            </Button>
-            <Button type="submit" name="verdict" value="reject" variant="outline">
-              Reject
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Approving re-runs the full policy engine against live data. A signature overrides the approval
-            requirement and nothing else — if the order was refunded elsewhere in the meantime, this still
-            will not pay.
-          </p>
-        </form>
+        <DecideForm actionId={a._id} />
       ) : (
         <p className="mt-8 rounded border border-dashed p-4 text-sm text-muted-foreground">
           This action is <span className="font-mono">{a.status}</span>. Decisions are single-use.

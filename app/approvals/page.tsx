@@ -27,26 +27,29 @@ export default async function ApprovalsPage() {
       ) : (
         <ul className="mt-6 divide-y rounded border">
           {pending.map(a => (
-            <li key={a._id} className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
-              <div className="min-w-0 flex-1">
-                <Link href={`/approvals/${a._id}`} className="font-medium hover:underline">
-                  {a.orderId}
-                </Link>
-                <span className="ml-2 font-mono text-sm">
-                  {a.computed ? formatMoney(a.computed.amount) : '—'}
-                </span>
-                <p className="mt-1 text-xs text-muted-foreground">{a.approval?.reason}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {a.policy?.rules
-                  .filter(r => r.verdict === 'require_approval')
-                  .map(r => (
-                    <span key={r.id} className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
-                      {r.id}
-                    </span>
-                  ))}
-                <Verdict value={a.status} />
-              </div>
+            <li key={a._id}>
+              <Link
+                href={`/approvals/${a._id}`}
+                className="group flex flex-wrap items-center gap-x-4 gap-y-2 p-4 transition-colors hover:bg-muted/40"
+              >
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium group-hover:underline">{a.orderId}</span>
+                  <span className="ml-2 font-mono text-sm">
+                    {a.computed ? formatMoney(a.computed.amount) : '—'}
+                  </span>
+                  <p className="mt-1 text-xs text-muted-foreground">{a.approval?.reason}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {a.policy?.rules
+                    .filter(r => r.verdict === 'require_approval')
+                    .map(r => (
+                      <span key={r.id} className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
+                        {r.id}
+                      </span>
+                    ))}
+                  <Verdict value={a.status} />
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
