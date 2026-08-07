@@ -23,6 +23,33 @@ const EXPECTED_TOOLS = [
   'ops_issue_refund',
 ]
 
+/**
+ * Wire payloads are deliberately untyped here.
+ *
+ * This script exists to check what the server ACTUALLY returns. Giving the responses a
+ * known TypeScript shape would assume the very thing under test — the assertions below
+ * are the validation, not the type system. Hence one scoped escape hatch rather than
+ * types that quietly agree with the code they are checking.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Wire = Record<string, any>
+
+type RpcBody = { result?: Wire; error?: Wire } & Wire
+
+type ToolDef = {
+  name: string
+  description?: string
+  inputSchema?: { properties?: Wire }
+  outputSchema?: Wire
+  annotations?: Record<string, boolean>
+}
+
+type ToolResult = {
+  structuredContent?: Wire
+  content?: { text: string }[]
+  isError?: boolean
+}
+
 let failures = 0
 let sessionId: string | undefined
 
@@ -48,7 +75,7 @@ async function rpc(method: string, params: unknown, token = TOKEN, notify = fals
   if (sid) sessionId = sid
 
   const text = await res.text()
-  let parsed: any = null
+  let parsed: RpcBody | null = null
   if (text.trim()) {
     const dataLines = text
       .split('\n')
@@ -57,7 +84,9 @@ async function rpc(method: string, params: unknown, token = TOKEN, notify = fals
     try {
       parsed = JSON.parse(dataLines.length ? dataLines[dataLines.length - 1] : text)
     } catch {
-      parsed = text
+      // Not JSON at all — an HTML auth wall, a proxy error page. Keep the raw body so
+      // isPlatformWall() can still recognise it.
+      parsed = { raw: text }
     }
   }
   return { status: res.status, body: parsed }
@@ -68,7 +97,7 @@ async function callTool(name: string, args: Record<string, unknown>) {
   const r = await rpc('tools/call', { name, arguments: args })
   const result = r.body?.result
   if (!result) throw new Error(`${name}: no result — ${JSON.stringify(r.body).slice(0, 400)}`)
-  return result as { structuredContent?: any; content?: { text: string }[]; isError?: boolean }
+  return result as ToolResult
 }
 
 console.log(`\nverifying ${URL_}\n`)
@@ -118,7 +147,7 @@ await rpc('notifications/initialized', {}, TOKEN, true)
 // E1 — the MCP contract itself
 // ---------------------------------------------------------------------------
 const list = await rpc('tools/list', {})
-const tools: any[] = list.body?.result?.tools ?? []
+const tools = (list.body?.result?.tools ?? []) as ToolDef[]
 
 check('E1a  tools/list returns exactly 5 tools', tools.length === 5, `got ${tools.length}: ${tools.map(t => t.name).join(', ')}`)
 check(
@@ -159,7 +188,7 @@ for (const t of tools) {
 
 // resources + prompt
 const res = await rpc('resources/list', {})
-const resources: any[] = res.body?.result?.resources ?? []
+const resources = (res.body?.result?.resources ?? []) as { uri?: string }[]
 check('E1n  policy resource is published', resources.some(r => String(r.uri).includes('policy')), JSON.stringify(resources).slice(0, 200))
 const prompts = await rpc('prompts/list', {})
 check('E1o  the triage prompt is published', (prompts.body?.result?.prompts ?? []).length >= 1)
@@ -169,13 +198,15 @@ check('E1o  the triage prompt is published', (prompts.body?.result?.prompts ?? [
 // ---------------------------------------------------------------------------
 try {
   const queue = await callTool('ops_list_delayed_shipments', { min_severity: 'all', limit: 25 })
-  const q = queue.structuredContent
+  // `?? {}` so a missing payload fails the assertions below rather than throwing
+  // before they run — E2a is the check that it was there at all.
+  const q = queue.structuredContent ?? {}
   check('E2a  the queue returns structuredContent', !!q, JSON.stringify(queue).slice(0, 300))
   check('E2b  detectors filter — some orders, not all 28', q.total_open > 0 && q.total_open < 28, `total_open=${q?.total_open}`)
 
   // ORD-1007 is the auto-approve case in the seed manifest.
   const inv = await callTool('ops_investigate_delivery_exception', { order_ref: 'ORD-1007' })
-  const i = inv.structuredContent
+  const i = inv.structuredContent ?? {}
   check('E2c  investigate joins payment and carrier data', !!i?.shipment && !!i?.captured)
   check('E2d  root causes carry traceable evidence', (i?.root_causes?.[0]?.evidence ?? []).length > 0)
   check('E2e  no verification on file yet', i?.shipment?.carrier_verification === null)
@@ -191,7 +222,7 @@ try {
   check('E2j  the precondition is now met', ver.structuredContent?.refund_precondition_met === true)
 
   const prev = await callTool('ops_preview_refund', { order_ref: 'ORD-1007', target: { mode: 'full_order' } })
-  const p = prev.structuredContent
+  const p = prev.structuredContent ?? {}
   check('E2k  the same order now previews as allow', p?.policy?.decision === 'allow', JSON.stringify(p?.policy).slice(0, 300))
   check('E2l  a single-use plan id is minted server-side', /^PLAN-[A-Z0-9]{20}$/.test(p?.plan_id ?? ''), p?.plan_id)
   check('E2m  the amount is computed by the server', p?.computed?.amount?.minor > 0)

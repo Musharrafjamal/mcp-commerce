@@ -196,7 +196,7 @@ cannot slip through with two sub-ceiling line refunds. That is test U4, not a co
       engine evaluates, so the published policy cannot drift from enforced behaviour
 - [x] 6.6 Static bearer token → actor label on every `action_log` entry (attribution, never authorization)
 - [x] 6.7 `GET /api/mcp` + `Accept: text/html` → human-readable server card
-- [x] 6.8 Deployed; **E1 + E2 + E3 all green against production** — 68 wire assertions
+- [x] 6.8 Deployed; **E1 + E2 + E3 all green against production** — 73 wire assertions
 
       E2 walks the whole workflow over raw JSON-RPC and proves the sequence, not just the surface:
       refund **denied** before verification → carrier confirms loss → the *same order* previews as
@@ -253,7 +253,7 @@ human gate real rather than theatrical), and any `dry_run: boolean` flag.
 ## 8 · Verification pass (~25 min)
 
 - [x] 8.1 `bun run test` — **93 assertions, 0 fail** (78 pure, 15 integration)
-- [x] 8.2 `bun run verify:deployed` — **68 assertions, 0 fail** against production
+- [x] 8.2 `bun run verify:deployed` — **73 assertions, 0 fail** against production
 - [x] 8.3 Manual run against production: the approve flow driven by hand in a browser, and the wire
       verification run from a fresh process using only the published token — no cached auth, no
       Deployment Protection
@@ -265,9 +265,11 @@ human gate real rather than theatrical), and any `dry_run: boolean` flag.
 - [x] 9.1 `README.md` — MCP URL + token above the fold, "Try it in 60 seconds", the tool reference
       table, architecture, the safety threat table, the seeded scenarios, why *these* tests, run-locally,
       and known limits including the `0.0.0.0/0` Atlas disclosure
-- [ ] 9.2 Capture a **verbatim** MCP client transcript, dated and labelled, into the README
-      ⛔ **needs you** — connect your own MCP client and paste the session. I can assert the wire
-      contract, but a real client transcript is evidence I cannot manufacture honestly
+- [x] 9.2 Transcript captured and linked from the README — `docs/transcript.md`, 12 real unedited
+      request/response pairs against production. **It is a wire transcript, not a live-model session**,
+      and says so in its own opening paragraph: the script chose the sequence. Pasting a real client
+      session on top of it would strengthen the ordering evidence, but nothing here overstates what
+      was captured
 - [x] 9.3 `DECISIONS.md` — the bounded problem, in/out scope with reasons, why the tools are
       task-shaped, the approval-queue reversal, where `deny` survives and why, the chat-playground
       rejection, **the tautology self-critique**, the assumptions, and what another day buys
@@ -279,6 +281,9 @@ human gate real rather than theatrical), and any `dry_run: boolean` flag.
 ---
 
 ## 10 · How to test it, step by step
+
+> The unchecked boxes in this section are **a checklist for whoever is testing**, not outstanding work.
+> Tick them as you go.
 
 Connect once, then run the five walkthroughs in order. Each is a distinct behaviour, not a repeat.
 
@@ -388,24 +393,25 @@ refusal to pick.
 
 ### Run the checks yourself
 
-- [ ] 10.16 `bun run verify:deployed` — 68 assertions over raw JSON-RPC against production
+- [ ] 10.16 `bun run verify:deployed` — 73 assertions over raw JSON-RPC against production
 - [ ] 10.17 `bun run test` — 93 assertions (needs `MONGODB_URI` in `.env.local`)
 
 ---
 
-## Seeded scenarios — 7 planted + 2 near-misses + 19 healthy = 28 orders
+## Seeded scenarios — 7 planted + 1 history + 2 near-misses + 18 healthy = 28 orders
 
 | Order | Planted | Expected verdict — what it proves |
 |---|---|---|
-| ORD-1007 $42 | Scans stop at hub D-9, promise D-4 passed, carrier → `LOST_IN_TRANSIT` | **allow** → auto-refunds. Also the idempotency-replay demo: run it twice, second is a no-op |
-| ORD-1001 $88 | Same pattern, larger amount, still under ceiling | **allow** → the engine acts on its own authority |
-| ORD-1002 $218 | Same pattern, **over the $150 ceiling** | **require_approval** → manager approves → executes. The human loop closes |
-| ORD-1006 $95 | Past promise date, but carrier → `IN_TRANSIT, revised ETA +2d` | **deny — premature.** ⭐ Proves "verified carrier exception" is load-bearing, not a label |
-| ORD-1003 $340 | `delivered` scan D-3, geocode within 30m of shipTo; customer contact D-1 "not received"; same customer had an identical claim + refund 71 days ago | **low confidence + require_approval at any amount.** ≥2 competing hypotheses each with contradicting evidence, prior-claim signal surfaced, **no recommended action.** ⭐ The others prove it can act; this proves it knows when it cannot |
-| ORD-1004 $64 | Verified lost, but a $64 refund already succeeded | **deny** — P2 + P7. Hard invariants hold |
-| ORD-1005 $120 | Verified lost, instrument `source_account_closed` | **require_approval** — policy has domain knowledge, not just arithmetic |
+| ORD-1007 $41.72 | Scans stop at hub D-9, promise D-4 passed, carrier → `LOST_IN_TRANSIT` | **allow** → auto-refunds. Also the idempotency-replay demo: run it twice, second is a no-op |
+| ORD-1001 $87.08 | Same pattern, larger amount, still under ceiling | **allow** → the engine acts on its own authority |
+| ORD-1002 $219.92 | Same pattern, **over the $150 ceiling** | **require_approval** → manager approves → executes. The human loop closes |
+| ORD-1006 $96.80 | Past promise date, but carrier → `IN_TRANSIT, revised ETA +2d` | **deny — premature.** ⭐ Proves "verified carrier exception" is load-bearing, not a label |
+| ORD-1003 $339.80 | `delivered` scan D-3, geocode within 30m of shipTo; customer contact D-1 "not received"; same customer had an identical claim + refund 71 days ago | **low confidence + require_approval at any amount.** ≥2 competing hypotheses each with contradicting evidence, prior-claim signal surfaced, **no recommended action.** ⭐ The others prove it can act; this proves it knows when it cannot |
+| ORD-1004 $63.32 | Verified lost, a full refund already succeeded, **but the order status still reads `open`** | **deny** — P2 + P9. The ledger outranks the order record |
+| ORD-1005 $121.64 | Verified lost, instrument `source_account_closed` | **require_approval** — policy has domain knowledge, not just arithmetic |
+| ORD-0977 $134.60 | Delivered, disputed **and** already refunded, 71 days ago | Detector must **NOT** fire — it exists only as the prior-claim signal on ORD-1003 |
 | ORD-1021 | 4 days without a scan but **inside** SLA and before promise date | Detector must **NOT** fire |
-| ORD-1022 | Delivered on time, no complaint, slightly odd scan ordering | Detector must **NOT** fire |
+| ORD-1022 | Delivered on time, no complaint | Detector must **NOT** fire |
 
 Determinism: fixtures are literal; the PRNG is used only for noise and never called conditionally;
 timestamps are offsets from a single `SEED_NOW`, so "9-day scan gap" is still 9 days when the reviewer
@@ -413,13 +419,16 @@ opens it next Tuesday.
 
 ---
 
-## Test list — 18 assertions
+## Test list — 18 named checks
+
+Each id below is a named claim, not a single `expect()`. They expand to **93 assertions** under
+`bun run test` and **73** under `bun run verify:deployed`.
 
 **Unit (11)** — pure, no DB, <1s
 
 | id | Proves |
 |---|---|
-| U1 | 7 fixtures → exact exception codes; **the 2 near-misses → `[]`**; the 19 healthy → `[]`. *A detector that fires on 100% of a dataset proves nothing* |
+| U1 | All 28 fixtures asserted against their expected code in one table; **the 2 near-misses and ORD-0977 → `[]`**; all 18 filler orders → `[]`; exactly 7 detected. *A detector that fires on 100% of a dataset proves nothing* |
 | U2 | ORD-1001 → `CARRIER_LOST_IN_TRANSIT`, confidence ≥0.8, evidence cites the real scan event id |
 | U3 🔒 | ORD-1003 → low band, ≥2 hypotheses each with supporting **and** contradicting evidence, no recommended remedy. **Keyed on the `EvidenceBundle`, never on the order id** — a rule that special-cased `ORD-1003` would fail its own test |
 | U4 🔒 | Ceiling boundary both sides: 15000 → `allow`, 15001 → `require_approval`. Plus the rolling window: $120 already refunded today + a $60 proposal → `require_approval` |
@@ -465,10 +474,9 @@ next step.
       tool selection
 - [ ] 11.2 **Read `AI-WORKLOG.md` and correct it.** Written in your voice from the session record; you
       are the only one who can confirm the division of responsibility is stated fairly 🔒
-- [ ] 11.3 **Submission email** — URL, repo, walkthrough link, docs, the one open interpretation, and an
-      honest "what I did not finish" 🔒
-- [ ] 11.4 Final pass: `bun run verify:deployed`, then reset the demo data so the first reviewer gets a
-      clean dataset
+- [ ] 11.3 **Submission email** — same item as §0.4, the only remaining client touchpoint 🔒
+- [x] 11.4 Final pass done: `bun run lint`, `bun run typecheck`, `bun run build`, `bun run test` (93),
+      `bun run verify:deployed` (73), all four live routes 200, and the demo data reseeded clean
 
 ### If there were another day — in priority order
 

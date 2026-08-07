@@ -256,7 +256,7 @@ Authorization: Bearer ${TOKEN}`}</Snippet>
           numbers, never prose</li>
       </ul>
       <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Each of those is backed by a test. There are 93 assertions plus 68 more run over the wire
+        Each of those is backed by a test. There are 93 assertions plus 73 more run over the wire
         against this deployment.
       </p>
 

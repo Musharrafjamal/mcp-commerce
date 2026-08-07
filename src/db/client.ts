@@ -11,7 +11,6 @@ export const dbName = (): string => process.env.MONGODB_DB?.trim() || 'opscopilo
 // Next can instantiate a module more than once across bundles, and every extra
 // MongoClient is another connection against an Atlas tier that caps them.
 declare global {
-  // eslint-disable-next-line no-var
   var __opsCopilotMongo: Promise<MongoClient> | undefined
 }
 

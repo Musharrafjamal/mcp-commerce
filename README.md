@@ -156,7 +156,7 @@ offsets from a single `SEED_NOW` — so "a 9-day scan gap" is still 9 days whene
 
 ```bash
 bun run test              # 93 assertions: 78 pure, 15 against a separate test database
-bun run verify:deployed   # 68 assertions over raw JSON-RPC against production
+bun run verify:deployed   # 73 assertions over raw JSON-RPC against production
 ```
 
 The tests exist to prove specific claims, not for coverage:
