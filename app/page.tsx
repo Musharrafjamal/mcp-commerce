@@ -56,77 +56,33 @@ export default function Page() {
         An MCP server for delivery exceptions
       </h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-        A guided walkthrough. It takes about ten minutes and needs any MCP-compatible AI client.
-        All data here is synthetic.
+        Connect any MCP-compatible AI client, then follow the five-step walkthrough below. About ten
+        minutes. All data here is synthetic.
       </p>
-
-      {/* ---------------------------------------------------------------- */}
-      <H2>The problem</H2>
-      <div className="mt-3 max-w-2xl space-y-3 text-sm leading-relaxed">
-        <p>
-          An operations specialist at a mid-size retail brand can see the storefront admin. They
-          <strong> cannot </strong>
-          see the payment gateway ledger, and they cannot see the carrier&rsquo;s scan history.
-        </p>
-        <p>
-          So when a customer writes in about a parcel that never arrived, the specialist cannot answer
-          the only question that matters — <em>where did it actually go, and do we owe this person
-          money?</em>{' '}— without messaging an engineer, who hand-writes database queries and then
-          performs the refund himself.
-        </p>
-        <p>
-          That engineer is the bottleneck. This removes them from the loop for one workflow, without
-          the obvious shortcut of handing a language model a database and hoping.
-        </p>
-      </div>
-
-      {/* ---------------------------------------------------------------- */}
-      <H2>Why that is harder than it looks</H2>
-      <div className="mt-3 max-w-2xl space-y-3 text-sm leading-relaxed">
-        <p>
-          Two orders can look <strong>identical</strong>{' '}in our own records — same silence from the
-          carrier, same missed delivery date, same everything — while one parcel is genuinely lost and
-          the other is sitting in a depot with a revised ETA. Refund the second one and you have paid
-          for a parcel that arrives the next morning.
-        </p>
-        <p>
-          And some cases are simply not decidable. The carrier&rsquo;s GPS says delivered to the
-          doorstep; the customer says nothing came. Both accounts have evidence. A system that always
-          produces an answer will confidently produce a wrong one.
-        </p>
-        <p className="rounded-md border-l-2 border-foreground/30 bg-muted/40 p-3">
-          So the design rule is: <strong>the server decides, the model narrates.</strong>{' '}Detection,
-          diagnosis, the refund amount and the policy verdict are all deterministic server-side code.
-          The model reads a verdict — it never authors one. There is no field on any tool where a model
-          can type a dollar amount.
-        </p>
-      </div>
-
-      {/* ---------------------------------------------------------------- */}
-      <H2>How the workflow runs</H2>
-      <pre className="mt-3 overflow-x-auto rounded-md border bg-muted/40 p-4 font-mono text-xs leading-relaxed">
-{`detect       ops_list_delayed_shipments           what needs attention
-investigate  ops_investigate_delivery_exception   what happened, and how sure are we
-verify       ops_verify_carrier_exception         what does the CARRIER say
-preview      ops_preview_refund                   the server computes the amount
-act          ops_issue_refund                     execute the plan by id
-confirm      ops_investigate_delivery_exception   re-run to check the outcome`}
-      </pre>
 
       {/* ---------------------------------------------------------------- */}
       <H2>Connect</H2>
       <div className="mt-3 space-y-4">
+        <Snippet label="claude.ai — Settings → Connectors → Add custom connector. Paste this as the URL and leave the OAuth fields empty (claude.ai cannot send a custom header, so the token rides in the URL).">
+          {`${URL_}/t/${TOKEN}`}
+        </Snippet>
+
         <Snippet label="Claude Code">{`claude mcp add --transport http ops-copilot ${URL_} \\
   --header "Authorization: Bearer ${TOKEN}"`}</Snippet>
 
-        <Snippet label="MCP Inspector — transport “Streamable HTTP”, then paste the URL and header below">
-          npx @modelcontextprotocol/inspector
-        </Snippet>
+        <details>
+          <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+            Other clients — MCP Inspector, plain URL + token, .mcp.json
+          </summary>
+          <div className="mt-4 space-y-4">
+            <Snippet label="MCP Inspector — transport “Streamable HTTP”, then paste the URL and header below">
+              npx @modelcontextprotocol/inspector
+            </Snippet>
 
-        <Snippet label="URL and token on their own">{`${URL_}
+            <Snippet label="URL and token on their own">{`${URL_}
 Authorization: Bearer ${TOKEN}`}</Snippet>
 
-        <Snippet label="Anything that reads .mcp.json">{`{
+            <Snippet label="Anything that reads .mcp.json">{`{
   "mcpServers": {
     "ops-copilot": {
       "type": "http",
@@ -135,11 +91,40 @@ Authorization: Bearer ${TOKEN}`}</Snippet>
     }
   }
 }`}</Snippet>
+          </div>
+        </details>
+
         <p className="text-xs text-muted-foreground">
           You should see <strong>5 tools, 3 resources and 1 prompt</strong>. The token is a demo
           credential guarding synthetic data — it is published here on purpose.
         </p>
       </div>
+
+      {/* ---------------------------------------------------------------- */}
+      <H2>What this is</H2>
+      <div className="mt-3 max-w-2xl space-y-3 text-sm leading-relaxed">
+        <p>
+          An operations specialist can see the storefront admin but not the payment ledger or the
+          carrier&rsquo;s scan history, so <em>&ldquo;where did the parcel go, and do we owe this
+          person money?&rdquo;</em>{' '}becomes a message to an engineer who hand-writes queries and
+          performs the refund himself. This removes that dependency for one workflow — a delayed, lost
+          or disputed delivery, and the refund decision that follows.
+        </p>
+        <p className="rounded-md border-l-2 border-foreground/30 bg-muted/40 p-3">
+          The design rule: <strong>the server decides, the model narrates.</strong>{' '}Detection,
+          diagnosis, the refund amount and the policy verdict are all deterministic server-side code.
+          The model reads a verdict — it never authors one. There is no field on any tool where a model
+          can type a dollar amount.
+        </p>
+      </div>
+      <pre className="mt-4 overflow-x-auto rounded-md border bg-muted/40 p-4 font-mono text-xs leading-relaxed">
+{`detect       ops_list_delayed_shipments           what needs attention
+investigate  ops_investigate_delivery_exception   what happened, and how sure are we
+verify       ops_verify_carrier_exception         what does the CARRIER say
+preview      ops_preview_refund                   the server computes the amount
+act          ops_issue_refund                     execute the plan by id
+confirm      ops_investigate_delivery_exception   re-run to check the outcome`}
+      </pre>
 
       {/* ---------------------------------------------------------------- */}
       <H2>The walkthrough</H2>
@@ -256,24 +241,16 @@ Authorization: Bearer ${TOKEN}`}</Snippet>
           numbers, never prose</li>
       </ul>
       <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Each of those is backed by a test. There are 93 assertions plus 73 more run over the wire
+        Each of those is backed by a test. There are 93 assertions plus 75 more run over the wire
         against this deployment.
       </p>
 
       {/* ---------------------------------------------------------------- */}
       <H2>If something looks wrong</H2>
-      <ul className="mt-3 max-w-2xl list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
-        <li>
-          <strong>A call times out.</strong>{' '}The demo database is on a free tier that pauses when idle.
-          Retry once.
-        </li>
-        <li>
-          <strong>A scenario is already resolved.</strong>{' '}Someone got here first. Reset below.
-        </li>
-        <li>
-          <strong>The queue is empty.</strong>{' '}Same cause — reset.
-        </li>
-      </ul>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+        A timed-out call is the free-tier database waking up — retry once. An already-resolved
+        scenario or an empty approvals queue means someone got here before you — reset below.
+      </p>
 
       <form action={reseedAction} className="mt-5">
         <Button type="submit" variant="outline">
